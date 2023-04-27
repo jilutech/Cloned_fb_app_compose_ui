@@ -30,7 +30,18 @@ class MainActivity : ComponentActivity() {
                     val signing = "sign"
                     NavHost(navController, startDestination = homeRoute) {
                         composable(homeRoute) {
-                            HomeScreen()
+                            HomeScreen(
+                                navigateToSignIn = {
+                                    navController.navigate(signing){
+                                        popUpTo(homeRoute){
+                                            inclusive =true
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                        composable(signing){
+                            SignIn()
                         }
                     }
                 }

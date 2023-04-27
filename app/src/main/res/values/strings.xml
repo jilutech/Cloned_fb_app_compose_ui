@@ -21,5 +21,6 @@
 
     <string name="facebook_app_id">123</string>
     <string name="fb_login_protocol_scheme">fb123</string>
-    <string name="facebook_client_token">123</string>
+    <string name="facebook_client_token">123
+    </string><string name="sign_with">Sign In With Facebook</string>
 </resources>

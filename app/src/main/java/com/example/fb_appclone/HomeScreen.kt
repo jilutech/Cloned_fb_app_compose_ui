@@ -4,7 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,11 +16,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.fb_appclone.ui.theme.Fb_AppCloneTheme
@@ -25,48 +33,199 @@ import com.example.fb_appclone.ui.theme.PurpleGrey40
 import com.google.android.material.tabs.TabItem
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    navigateToSignIn : () -> Unit
+) {
+    HomeScreenContent()
+//    val viewModel = viewModel<HomeScreenViewModel>()
+//    val state by viewModel.state.collectAsState()
+//    when(state){
+//        is HomeScreenState.loaded ->     HomeScreenContent()
+//        is HomeScreenState.Loading -> LoadingScreen()
+//        is HomeScreenState.SignInRequired -> LaunchedEffect(Unit){
+//            navigateToSignIn()
+//        }
+//        else -> {}
+//    }
+
+
+}
+
+@Composable
+fun LoadingScreen() {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(Color.Blue), contentAlignment = Alignment.Center){
+        CircularProgressIndicator()
+
+    }
+}
+
+@Composable
+private fun HomeScreenContent() {
     Box(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
             .fillMaxSize()
     ) {
-        LazyColumn{
-            item{
+        LazyColumn {
+            item {
                 TopBar()
             }
             item {
                 TabBar()
             }
             item {
-                statusUpdateBar("")
+                statusUpdateBar("",
+                    onTextChange = {
+
+                    },
+                    onSendClick = {
+
+                    }
+                )
+            }
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+                PostCards()
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun PostCards() {
+    Surface() {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(8.dp)){
+            AsyncImage(model = ImageRequest.Builder(LocalContext.current)
+                .data("url").crossfade(true).build(), contentDescription = null,
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape))
+            Column(Modifier.weight(1f)) {
+                
+            }
+            IconButton(onClick = { }) {
+                Icon(Icons.Rounded.MailOutline, contentDescription = stringResource(R.string.share) )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+    fun statusUpdateBar(
+    avatar:String,
+    onTextChange:(String) -> Unit,
+    onSendClick:() -> Unit
+) {
+    Surface() {
+        Column{
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(avatar)
+                        .crossfade(true)
+                        .placeholder(R.drawable.ic_launcher_background)
+                        .build(),
+                    contentDescription =null,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+//           Text(text = stringResource(id = R.string.whats_on_your_mind))
+                var inputStatus by remember {
+                    mutableStateOf("")
+                }
+                TextField(colors = TextFieldDefaults.textFieldColors(Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent),
+                    modifier = Modifier.fillMaxWidth(),
+                    value = inputStatus,
+                    onValueChange = {
+                        inputStatus=it
+                        onTextChange(it)
+                    },
+                    placeholder = {
+                        Text(stringResource(R.string.whats_on_your_mind))
+                    },
+                    keyboardActions = KeyboardActions(onSend = {
+
+                        onSendClick()
+                        inputStatus=""
+                    }),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send))
+
+            }
+            Divider(thickness = Dp.Hairline)
+            Row {
+                verticalDivider(modifier = Modifier.height(48.dp))
+                StatusAction(Icons.Rounded.Home,
+                    stringResource(R.string.live),
+                    modifier = Modifier.weight(1f))
+                verticalDivider(modifier = Modifier.height(48.dp))
+                StatusAction(Icons.Rounded.Home,
+                    stringResource(R.string.live),
+                    modifier = Modifier.weight(1f))
+                verticalDivider(modifier = Modifier.height(48.dp))
+                StatusAction(Icons.Rounded.Home,
+                    stringResource(R.string.live),
+                    modifier = Modifier.weight(1f))
             }
         }
 
     }
-
-
+}
+@Composable
+fun verticalDivider(
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+    thickness: Dp =1.dp,
+    topIndent: Dp = 0.dp
+) {
+    val indentMod = if (topIndent.value != 0f) {
+        Modifier.padding(top = topIndent)
+    } else {
+        Modifier
+    }
+    val targetThickness = if (thickness == Dp.Hairline) {
+        (1f / LocalDensity.current.density).dp
+    } else {
+        thickness
+    }
+    Box(
+        modifier
+            .then(indentMod)
+            .fillMaxHeight()
+            .width(targetThickness)
+            .background(color = color)
+    )
 }
 
 @Composable
-fun statusUpdateBar(
-    avatar:String
-) {
-    Surface() {
-        Row(Modifier.fillMaxWidth()) {
+private fun StatusAction(imageIcon : ImageVector,text : String,modifier: Modifier = Modifier) {
 
-           AsyncImage(model = ImageRequest.Builder(
-            LocalContext.current
-           )
-               .data(avatar)
-               .crossfade(true)
-               .placeholder(R.drawable.ic_launcher_background)
-               .build(), contentDescription =null,
-               modifier = Modifier.size(48.dp)
-                                  .clip(CircleShape )
-
-               )
-            
+    TextButton(
+        modifier = modifier,
+        onClick = { },
+        colors = ButtonDefaults.textButtonColors(
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(imageIcon, contentDescription = text)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = stringResource(R.string.live))
         }
     }
 }
@@ -154,11 +313,7 @@ private fun TabBar(){
     }
 
 }
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    HomeScreen()
-}
+//@Preview(s_
 
 data class TabItem(
     val icon: ImageVector,
