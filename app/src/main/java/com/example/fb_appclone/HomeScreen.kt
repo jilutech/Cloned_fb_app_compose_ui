@@ -2,9 +2,11 @@ package com.example.fb_appclone
 
 import android.text.format.DateUtils
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,9 +18,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -26,6 +30,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -116,28 +121,119 @@ fun storySection() {
             , vertical = 8.dp))
         {
             item {
-                CreateAStoryCard()
+                CreateAStoryCard("https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80")
             }
         }
 
     }
 }
-
+val friendsStories = listOf(
+    FriendStory(
+        friendName = "Frank Young",
+        avatarUrl = "https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=987&q=80",
+        bgUrl = "https://images.unsplash.com/photo-1511988617509-a57c8a288659?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2071&q=80"
+    ),
+    FriendStory(
+        friendName = "Joey Rhyu",
+        avatarUrl = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=987&q=80",
+        bgUrl = "https://images.unsplash.com/photo-1569937756447-1d44f657dc69?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=987&q=80"
+    ),
+    FriendStory(
+        friendName = "Ana Smith",
+        avatarUrl = "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1061&q=80",
+        bgUrl = "https://images.unsplash.com/photo-1539635278303-d4002c07eae3?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80"
+    ),
+    FriendStory(
+        friendName = "Judy Peters",
+        avatarUrl = "https://images.unsplash.com/photo-1569913486515-b74bf7751574?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=989&q=80",
+        bgUrl = "https://images.unsplash.com/photo-1607749111659-e1c8e05f5f24?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=987&q=80"
+    )
+)
+@Composable
+fun StoriesSection() {
+    Surface {
+        LazyRow(
+            Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            item {
+                CreateAStoryCard(avatarUrl = "https://images.unsplash.com/photo-1607749111659-e1c8e05f5f24?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=987&q=80")
+            }
+            items(friendsStories){
+                StoryCard(story = it)
+            }
+//            items(friendsStories) { story ->
+//                StoryCard(story)
+//            }
+        }
+    }
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateAStoryCard() {
-    Card(Modifier.size(140.dp,220.dp)) {
+fun StoryCard(story: FriendStory) {
+    Card(Modifier.size(140.dp, 220.dp)) {
         Box(Modifier.fillMaxSize()) {
+            AsyncImage(model = ImageRequest.Builder(LocalContext.current)
+                .data(story.bgUrl)
+                .crossfade(true)
+                .build(),
+                contentScale = ContentScale.Crop,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize())
+
+
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data("")
+                    .data(story.avatarUrl)
+                    .crossfade(true)
+                    .build(),
+                contentScale = ContentScale.Crop,
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .size(36.dp)
+                    .align(Alignment.TopStart)
+                    .clip(CircleShape)
+                    .border(4.dp, MaterialTheme.colorScheme.primary, CircleShape)
+            )
+            Scrim(modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .align(Alignment.BottomCenter)
+            )
+            Text(story.friendName, color = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .align(Alignment.BottomStart))
+        }
+    }
+}
+
+@Composable
+fun Scrim(modifier: Modifier) {
+    Box(modifier = modifier.background(
+        Brush.verticalGradient(
+        listOf(Color.Transparent, Color(0x40000000))
+    )))
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CreateAStoryCard(
+    avatarUrl: String,
+) {
+    Card(Modifier.size(140.dp, 220.dp)) {
+        Box(Modifier.fillMaxSize()) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current).data(avatarUrl)
                     .crossfade(true)
                     .placeholder(R.drawable.ic_launcher_background)
                     .build(),
+                contentScale = ContentScale.Crop,
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop)
-            val bgHeight by remember {
+                modifier = Modifier.fillMaxSize()
+            )
+
+            var bgHeight by remember {
                 mutableStateOf(0.dp)
             }
             Box(
@@ -147,27 +243,40 @@ fun CreateAStoryCard() {
                     .height(bgHeight - 19.dp)
                     .align(Alignment.BottomCenter)
             )
-            Column(modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .padding(vertical = 8.dp, horizontal = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(modifier = Modifier
-                    .background(MaterialTheme.colorScheme.primary)
-                    .clip(CircleShape)
-                    .size(36.dp),
-                   contentAlignment = Alignment.Center
-                    ) {
-                     Icon(Icons.Rounded.Add,
-                         contentDescription = stringResource(R.string.add),
-                          tint = MaterialTheme.colorScheme.primary
-                     )
-                     }
-                Spacer(modifier = Modifier.height(25.dp))
-                Text(text = stringResource(R.string.create_a_story))
+            val density = LocalDensity.current
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .onGloballyPositioned {
+                        bgHeight = with(density) {
+                            it.size.height.toDp()
+                        }
+                    },
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    Modifier
+                        .size(36.dp)
+                        .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Rounded.Add,
+                        contentDescription = stringResource(R.string.add),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    stringResource(R.string.create_a_story), textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
+                Spacer(Modifier.height(8.dp))
             }
         }
-
     }
 }
 
@@ -382,20 +491,6 @@ private fun TabBar(){
                         })
                 }
             }
-
-
-
-//            Tab(selected = tabIndex == 0, onClick = { tabIndex == 0},
-//             selectedContentColor = MaterialTheme.colorScheme.primary,
-//             unselectedContentColor = MaterialTheme.colorScheme.onSurface
-//                ) {
-//                Icon(Icons.Rounded.Home, contentDescription = stringResource(R.string.home) )
-//            }
-//            Tab(selected = tabIndex == 1, onClick = { tabIndex == 1},
-//                selectedContentColor = MaterialTheme.colorScheme.primary,
-//                unselectedContentColor = MaterialTheme.colorScheme.onSurface) {
-//                Icon(Icons.Rounded.Home, contentDescription = stringResource(R.string.home) )
-//            }
         }
     }
 
@@ -412,30 +507,11 @@ private fun dateLabel(timestamp: Date, today: Date): String {
             DateUtils.FORMAT_SHOW_WEEKDAY).toString()
     }
 }
-
-//@Composable
-//fun PostCard(post: Post){
-//    Surface() {
-//      Row(
-//          Modifier
-//              .fillMaxWidth()
-//              .padding(8.dp)) {
-//
-//          AsyncImage(model = ImageRequest.Builder(LocalContext.current)
-//              .data(post.authorAvatarUrl)
-//              .crossfade(true)
-//              .placeholder(R.drawable.baseline_person_24).build()
-//              , contentDescription = null, modifier = Modifier.size(48.dp).clip(CircleShape)
-//              )
-//      }
-//
-//
-//    }
-//}
 @Preview(showBackground = true)
 @Composable
 fun Preview(){
-    CreateAStoryCard()
+//    CreateAStoryCard("https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80")
+    StoriesSection()
 }
 
 data class TabItem(
