@@ -41,7 +41,15 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable(signing){
-                            SignIn()
+                            SignIn(
+                                navigateHome = {
+                                    navController.navigate(homeRoute){
+                                        popUpTo(signing){
+                                            inclusive = true
+                                        }
+                                    }
+                                }
+                            )
                         }
                     }
                 }

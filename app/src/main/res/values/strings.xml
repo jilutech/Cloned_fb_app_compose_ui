@@ -19,8 +19,12 @@
     <string name="comment">Comment</string>
     <string name="share">Share</string>
 
+    <string name="sign_with">Sign In With Facebook</string>
+
+
     <string name="facebook_app_id">123</string>
-    <string name="fb_login_protocol_scheme">fb123</string>
-    <string name="facebook_client_token">123
-    </string><string name="sign_with">Sign In With Facebook</string>
+    <string name="fb_login_protocol_scheme">fb1234</string>
+    <string name="facebook_client_token">123</string>
+
+
 </resources>

@@ -1,8 +1,10 @@
 package com.example.fb_appclone
 
+import android.text.format.DateUtils
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,11 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -31,24 +35,28 @@ import coil.request.ImageRequest
 import com.example.fb_appclone.ui.theme.Fb_AppCloneTheme
 import com.example.fb_appclone.ui.theme.PurpleGrey40
 import com.google.android.material.tabs.TabItem
+import java.util.*
 
 @Composable
 fun HomeScreen(
-    navigateToSignIn : () -> Unit
+    navigateToSignIn : () -> Unit,
 ) {
-    HomeScreenContent()
-//    val viewModel = viewModel<HomeScreenViewModel>()
-//    val state by viewModel.state.collectAsState()
-//    when(state){
-//        is HomeScreenState.loaded ->     HomeScreenContent()
-//        is HomeScreenState.Loading -> LoadingScreen()
-//        is HomeScreenState.SignInRequired -> LaunchedEffect(Unit){
-//            navigateToSignIn()
-//        }
-//        else -> {}
-//    }
-
-
+    val viewModel = viewModel<HomeScreenViewModel>()
+    val state by viewModel.state.collectAsState()
+    when (state) {
+        is HomeScreenState.Loaded -> {
+            val loaded = state as HomeScreenState.Loaded
+            HomeScreenContent(posts = loaded.posts, avatarUrl = loaded.avatarUrl, onTextChanged = {
+                viewModel.onTextChanged(it)
+            }, onSendClick = {
+                viewModel.onSendClick()
+            })
+        }
+        HomeScreenState.Loading -> LoadingScreen()
+        HomeScreenState.SignInRequired -> LaunchedEffect(Unit) {
+            navigateToSignIn()
+        }
+    }
 }
 
 @Composable
@@ -62,7 +70,12 @@ fun LoadingScreen() {
 }
 
 @Composable
-private fun HomeScreenContent() {
+private fun HomeScreenContent(
+    posts: List<Post>,
+    avatarUrl: String,
+    onTextChanged: (String) -> Unit,
+    onSendClick: () -> Unit,
+) {
     Box(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -87,27 +100,101 @@ private fun HomeScreenContent() {
             }
             item {
                 Spacer(modifier = Modifier.height(8.dp))
-                PostCards()
+//                PostCards()
                 Spacer(modifier = Modifier.height(8.dp))
+            }
+            item {
+                storySection()
             }
         }
     }
 }
+@Composable
+fun storySection() {
+    Surface() {
+        LazyRow(Modifier.fillMaxWidth(), contentPadding = PaddingValues(horizontal = 8.dp
+            , vertical = 8.dp))
+        {
+            item {
+                CreateAStoryCard()
+            }
+        }
+
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CreateAStoryCard() {
+    Card(Modifier.size(140.dp,220.dp)) {
+        Box(Modifier.fillMaxSize()) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data("")
+                    .crossfade(true)
+                    .placeholder(R.drawable.ic_launcher_background)
+                    .build(),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop)
+            val bgHeight by remember {
+                mutableStateOf(0.dp)
+            }
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface)
+                    .height(bgHeight - 19.dp)
+                    .align(Alignment.BottomCenter)
+            )
+            Column(modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .padding(vertical = 8.dp, horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(modifier = Modifier
+                    .background(MaterialTheme.colorScheme.primary)
+                    .clip(CircleShape)
+                    .size(36.dp),
+                   contentAlignment = Alignment.Center
+                    ) {
+                     Icon(Icons.Rounded.Add,
+                         contentDescription = stringResource(R.string.add),
+                          tint = MaterialTheme.colorScheme.primary
+                     )
+                     }
+                Spacer(modifier = Modifier.height(25.dp))
+                Text(text = stringResource(R.string.create_a_story))
+            }
+        }
+
+    }
+}
 
 @Composable
-fun PostCards() {
+fun PostCards(post : Post) {
     Surface() {
         Row(
             Modifier
                 .fillMaxWidth()
-                .padding(8.dp)){
+                .padding(8.dp), verticalAlignment = Alignment.CenterVertically){
             AsyncImage(model = ImageRequest.Builder(LocalContext.current)
                 .data("url").crossfade(true).build(), contentDescription = null,
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape))
-            Column(Modifier.weight(1f)) {
+            Column(
+                Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp)) {
                 
+                Text(text = "aMy", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
+
+                val today = remember {
+                    Date()
+                }
+                Text(dateLabel(timestamp = post.timestamp, today = today),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.66f))
             }
             IconButton(onClick = { }) {
                 Icon(Icons.Rounded.MailOutline, contentDescription = stringResource(R.string.share) )
@@ -313,7 +400,43 @@ private fun TabBar(){
     }
 
 }
-//@Preview(s_
+
+@Composable
+private fun dateLabel(timestamp: Date, today: Date): String {
+    return if (today.time - timestamp.time < 2 * DateUtils.MINUTE_IN_MILLIS) {
+        stringResource(R.string.just_now)
+    } else {
+        DateUtils.getRelativeTimeSpanString(timestamp.time,
+            today.time,
+            0,
+            DateUtils.FORMAT_SHOW_WEEKDAY).toString()
+    }
+}
+
+//@Composable
+//fun PostCard(post: Post){
+//    Surface() {
+//      Row(
+//          Modifier
+//              .fillMaxWidth()
+//              .padding(8.dp)) {
+//
+//          AsyncImage(model = ImageRequest.Builder(LocalContext.current)
+//              .data(post.authorAvatarUrl)
+//              .crossfade(true)
+//              .placeholder(R.drawable.baseline_person_24).build()
+//              , contentDescription = null, modifier = Modifier.size(48.dp).clip(CircleShape)
+//              )
+//      }
+//
+//
+//    }
+//}
+@Preview(showBackground = true)
+@Composable
+fun Preview(){
+    CreateAStoryCard()
+}
 
 data class TabItem(
     val icon: ImageVector,
