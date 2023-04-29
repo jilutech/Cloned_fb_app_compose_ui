@@ -70,7 +70,6 @@ fun LoadingScreen() {
         .fillMaxSize()
         .background(Color.Blue), contentAlignment = Alignment.Center){
         CircularProgressIndicator()
-
     }
 }
 
@@ -162,9 +161,7 @@ fun StoriesSection() {
             items(friendsStories){
                 StoryCard(story = it)
             }
-//            items(friendsStories) { story ->
-//                StoryCard(story)
-//            }
+
         }
     }
 }
@@ -192,7 +189,7 @@ fun StoryCard(story: FriendStory) {
                 modifier = Modifier
                     .padding(8.dp)
                     .size(36.dp)
-                    .align(Alignment.TopStart)
+                    .align(Alignment.TopCenter)
                     .clip(CircleShape)
                     .border(4.dp, MaterialTheme.colorScheme.primary, CircleShape)
             )
@@ -279,7 +276,6 @@ fun CreateAStoryCard(
         }
     }
 }
-
 @Composable
 fun PostCards(post : Post) {
     Surface() {
@@ -311,7 +307,6 @@ fun PostCards(post : Post) {
         }
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
     fun statusUpdateBar(
@@ -407,7 +402,6 @@ fun verticalDivider(
             .background(color = color)
     )
 }
-
 @Composable
 private fun StatusAction(imageIcon : ImageVector,text : String,modifier: Modifier = Modifier) {
 
@@ -425,7 +419,6 @@ private fun StatusAction(imageIcon : ImageVector,text : String,modifier: Modifie
         }
     }
 }
-
 @Composable
 private fun TopBar() {
     Surface() {
@@ -459,7 +452,6 @@ private fun TopBar() {
     }
 
 }
-
 @Composable
 private fun TabBar(){
     Surface() {
@@ -495,7 +487,6 @@ private fun TabBar(){
     }
 
 }
-
 @Composable
 private fun dateLabel(timestamp: Date, today: Date): String {
     return if (today.time - timestamp.time < 2 * DateUtils.MINUTE_IN_MILLIS) {
